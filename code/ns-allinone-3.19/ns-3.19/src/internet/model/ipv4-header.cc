@@ -31,6 +31,92 @@ namespace ns3 {
 NS_OBJECT_ENSURE_REGISTERED (Ipv4Header)
   ;
 
+/***************************************************
+
+      Packet Tag Header Class
+  
+*****************************************************/
+
+PTagHeader::PTagHeader() {
+
+}
+
+TypeId
+PTagHeader::GetTypeId(void){
+  static TypeId tid = TypeId("ns3::PTagHeader")
+    .SetParent<Header>()
+    .AddConstructor<PTagHeader> ()
+  ;
+  return tid;
+}
+
+TypeId
+PTagHeader::GetInstanceTypeId(void) const {
+  return GetTypeId();
+}
+
+void
+PTagHeader::Print (std::ostream &os) const
+{
+  // This method is invoked by the packet printing
+  // routines to print the content of the header.
+  //os << "data=" << m_data << std::endl;
+  os << "tag=" << m_tag << ", addr=" << m_lastTagAddress;
+}
+uint32_t
+PTagHeader::GetSerializedSize (void) const
+{
+  // we reserve 2 bytes for our header.
+  return 8;
+}
+void
+PTagHeader::Serialize (Buffer::Iterator start) const
+{
+  // we can serialize two bytes at the start of the buffer.
+  // we write them in network byte order.
+  Buffer::Iterator i = start;
+  i.WriteHtonU32 (m_tag);
+  i.WriteHtonU32 (m_lastTagAddress.Get());
+}
+uint32_t
+PTagHeader::Deserialize (Buffer::Iterator start)
+{
+  // we can deserialize two bytes from the start of the buffer.
+  // we read them in network byte order and store them
+  // in host byte order.
+  Buffer::Iterator i = start;
+  m_tag = i.ReadNtohU32 ();
+  m_lastTagAddress.Set(i.ReadNtohU32());
+  // we return the number of bytes effectively read.
+  return 8;
+}
+
+void
+PTagHeader::SetTag(t_tag tag){
+  m_tag = tag;
+}
+
+t_tag 
+PTagHeader::GetTag(void){
+  return m_tag;
+}
+
+Ipv4Address 
+PTagHeader::GetTagAddress(){
+  return m_lastTagAddress;
+}
+
+void 
+PTagHeader::SetTagAddress(Ipv4Address addr){
+  m_lastTagAddress = addr;
+}
+
+/***************************************************
+
+      Ipv4 Header Class
+  
+*****************************************************/
+
 Ipv4Header::Ipv4Header ()
   : m_calcChecksum (false),
     m_payloadSize (0),

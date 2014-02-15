@@ -203,23 +203,11 @@ private:
  */
 
 
-typedef std::list<unsigned char*> Tags;
-typedef std::list<unsigned char*>::iterator TagsI;
+
 
 class Packet : public SimpleRefCount<Packet>
 {
 public:
-
-
-  void AddTag(unsigned char* tag);
-
-  TagsI GetTags();
-
-  void RemoveTag(unsigned char* tag);
-
-  Ipv4Address GetLastTagAddress();
-
-  void SetLastTagAddress(Ipv4Address addr);
 
   /**
    * Create an empty packet with a new uid (as returned
@@ -265,7 +253,7 @@ public:
    *
    * \param start offset from start of packet to start of fragment to create
    * \param length length of fragment to create
-   * \returns a fragment of the original packet
+   * \returns a fragment of the o2riginal packet
    */
   Ptr<Packet> CreateFragment (uint32_t start, uint32_t length) const;
   /**
@@ -612,8 +600,6 @@ private:
 
   static uint32_t m_globalUid;
 
-  Tags m_tags;
-  Ipv4Address m_lastTagAddress; //the address of the last router who added a tag
 };
 
 std::ostream& operator<< (std::ostream& os, const Packet &packet);

@@ -29,6 +29,42 @@
 
   
 namespace ns3 {
+
+
+/**
+ * PTag Header
+ */
+typedef uint32_t t_tag;
+
+typedef std::list<t_tag> Tags;
+typedef std::list<t_tag>::iterator TagsI;
+
+class PTagHeader : public Header
+{
+public:
+
+  PTagHeader();
+
+  void SetTag(t_tag tag);
+
+  t_tag GetTag(void);
+
+  Ipv4Address GetTagAddress();
+
+  void SetTagAddress(Ipv4Address addr);
+
+  static TypeId GetTypeId (void);
+  virtual TypeId GetInstanceTypeId (void) const;
+  virtual void Print (std::ostream &os) const;
+  virtual void Serialize (Buffer::Iterator start) const;
+  virtual uint32_t Deserialize (Buffer::Iterator start);
+  virtual uint32_t GetSerializedSize (void) const;
+
+private:
+  //only concerned with the most recent tag
+  t_tag m_tag;
+  Ipv4Address m_lastTagAddress;
+};
 /**
  * \brief Packet header for IPv4
  */

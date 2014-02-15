@@ -42,18 +42,22 @@ namespace ns3 {
 //generate a base tag from the incoming network address
 //this is used to deterministically build all tag tables at each router
 PTag::PTag(Ipv4Address routerAddr) {
-  uint8_t buf[4];
-  routerAddr.Serialize(&buf);
-  m_baseTag = (unsigned char*) malloc(4);
-  for(int i=0; i < 4; i++) {
-    m_baseTag[i] = (unsigned char) buf[i];
-  }
-  
+  uint8_t * m_baseTag = (uint8_t *) malloc(4);
+  routerAddr.Serialize(m_baseTag);
 }
 
+PTag::~PTag() {
+  if (m_baseTag != NULL){
+    free(m_baseTag);
+  }
+}
+
+//Get the hashed variant of the base tag. The interval argument dictates which
+//unix time interval to use. If this is 0, the current interval is used. Any other 
+//value will rewind the interval (for edge cases where the interval changes durring transport)
 t_tag
-PTag::GetTransportTag(void) {
-  t_tag hash;
+PTag::GetTransportTag(int interval) {
+  t_tag hash = 0;
   //generate the hashTag, combine it with time
   return hash;
 }
@@ -106,13 +110,8 @@ TagTableEntry::Matches(Ipv4Address addr) {
 bool
 TagTableEntry::VerifyTag(t_tag other) {
   //hash, timestamp, ect
-  t_tag mine = m_tag->GetTransportTag();
-  for (int i=0; i<TAG_LEN; i++) {
-    if (*(other + i) != *(mine + i)) {
-      return false;
-    }
-  }
-  return true;
+  t_tag mine = m_tag->GetTransportTag(0);
+  return mine == other;
 }
 
 

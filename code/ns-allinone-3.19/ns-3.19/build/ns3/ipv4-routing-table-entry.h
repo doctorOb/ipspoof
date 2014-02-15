@@ -25,6 +25,7 @@
 #include <ostream>
 
 #include "ns3/ipv4-address.h"
+#include "ns3/ipv4-header.h" // for tag typedef
 
 namespace ns3 {
 
@@ -37,9 +38,10 @@ class PTag {
 
 public:
   PTag(Ipv4Address routerAddr);
-  unsigned char* GetTransportTag(void);
+  ~PTag();
+  t_tag GetTransportTag(int interval);
 private:
-  uint32_t m_baseTag;
+  uint8_t* m_baseTag;
 };
 
 class TagTableEntry {
@@ -60,7 +62,7 @@ public:
 
   bool Matches(Ipv4Address addr);
 
-  bool VerifyTag(unsigned char* other);
+  bool VerifyTag(t_tag other);
 
 private:
   PTag* m_tag;

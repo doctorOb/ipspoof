@@ -112,6 +112,13 @@ public:
   /* index the tag table by prefix, return an entry if found */
   TagTableEntry* GetEntryFromTagTable(Ipv4Address address);
 
+  /* given a packet, check for the presence of a tag (if one should exist), and
+  *  determine if this packet should be forwarded or dropped. If it is to be 
+  *  forwarded, tags are added, and existing tags are stripped. 
+  *  Also updates the lastHopAddress field on the packet
+  */
+  bool PTagLogicDoForward(Ptr<Packet> p);
+
   /**
    * \brief Add a host route to the global routing table.
    *
@@ -285,7 +292,8 @@ private:
 
   TagTable m_tagTable;
 
-  Ipv4Address m_ownAddress;
+  Ipv4Address m_ownAddress;           //address that this router 
+  PTag* m_ownTag;                     //Packet tag that this router should add to each packet
 
   NetworkRoutes m_networkRoutes;       //!< Routes to networks
   ASExternalRoutes m_ASexternalRoutes; //!< External routes imported

@@ -26,6 +26,7 @@
 #include "ns3/net-device.h"
 #include "ns3/ipv4-route.h"
 #include "ns3/ipv4-routing-table-entry.h"
+#include "ns3/ipv4-address.h"
 #include "ns3/boolean.h"
 #include "ipv4-global-routing.h"
 #include "global-route-manager.h"
@@ -99,7 +100,6 @@ Ipv4GlobalRouting::AddTagToTable (Ipv4Mask subnet,
 {
   //TODO: generate the tag from the interface/prefix combo
   if (GetEntryFromTagTable(addr) != NULL) {
-    NS_LOG_LOGIC("Entry exists in table");
     return;
   }
 
@@ -123,15 +123,39 @@ Ipv4GlobalRouting::GetEntryFromTagTable(Ipv4Address address)
 
 bool
 Ipv4GlobalRouting::PTagLogicDoForward(Ptr<Packet> p) {
-    Ipv4Address sourceAddress = p->GetLastTagAddress();
-    TagTableEntry* entry = GetEntryFromTagTable(sourceAddress);
-    if (entry != NULL) {
-      NS_LOG_INFO("Entry in tag table found for source: " << sourceAddress);
-      p->SetLastTagAddress(m_ownAddress);
+  if(!m_inspectPacketTags) {
+    //not a 'deploying router' so just return true
+    return true;
+  }
+
+  PTagHeader tag_head;
+  PTagHeader new_head;
+  if (p->PeekHeader(tag_head) == 0) {
+    //header not there, so add ours
+    new_head.SetTagAddress(m_ownAddress);
+    new_head.SetTag(m_ownTag->GetTransportTag(0));
+    p->AddHeader(new_head); //add new one
+    return true;
+  }
+
+  NS_LOG_INFO("Found tag header, with tag: " << tag_head.GetTag() 
+                << " and addr:" << tag_head.GetTagAddress());
+  Ipv4Address sourceAddress = tag_head.GetTagAddress();
+  NS_LOG_INFO("indexing tag table for address " << sourceAddress);
+  TagTableEntry* entry = GetEntryFromTagTable(sourceAddress);
+  if (entry != NULL) {
+    NS_LOG_INFO("Entry in tag table found for source: " << sourceAddress);
+    t_tag ptag = tag_head.GetTag();
+    if (entry->VerifyTag(ptag)) {
+      new_head.SetTagAddress(m_ownAddress);
+      new_head.SetTag(m_ownTag->GetTransportTag(0));
+      p->RemoveHeader(tag_head); //strip old tag
+      p->AddHeader(new_head); //add new one
       return true;
-    } else {
-      return false;
     }
+  } 
+
+  return false;
 }
 
 void 
@@ -512,20 +536,20 @@ Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
 Ptr<Ipv4Route>
 Ipv4GlobalRouting::RouteOutput (Ptr<Packet> p, const Ipv4Header &header, Ptr<NetDevice> oif, Socket::SocketErrno &sockerr)
 {
-  NS_LOG_FUNCTION (this << p << &header << oif << &sockerr);
+  //NS_LOG_FUNCTION (this << p << &header << oif << &sockerr);
 //
 // First, see if this is a multicast packet we have a route for.  If we
 // have a route, then send the packet down each of the specified interfaces.
 //
   if (header.GetDestination ().IsMulticast ())
     {
-      NS_LOG_LOGIC ("Multicast destination-- returning false");
+      //NS_LOG_LOGIC ("Multicast destination-- returning false");
       return 0; // Let other routing protocols try to handle this
     }
 //
 // See if this is a unicast packet we have a route for.
 //
-  NS_LOG_LOGIC ("Unicast destination- looking up");
+  //NS_LOG_LOGIC ("Unicast destination- looking up");
   Ptr<Ipv4Route> rtentry = LookupGlobal (header.GetDestination (), oif);
   if (rtentry)
     {
@@ -538,10 +562,11 @@ Ipv4GlobalRouting::RouteOutput (Ptr<Packet> p, const Ipv4Header &header, Ptr<Net
 
   //HOOOK FOR THE TAG LOGIC
   if (PTagLogicDoForward(p)) {
-
+    return rtentry;
   } else {
     //not using the tag protocol. Return normally.
-    return rtentry;
+    NS_LOG_INFO("Packet tags not matching, dropping packet");
+    return NULL;
   }
 }
 

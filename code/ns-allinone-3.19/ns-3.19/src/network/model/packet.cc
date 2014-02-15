@@ -224,35 +224,6 @@ Packet::Packet (const Buffer &buffer,  const ByteTagList &byteTagList,
 {
 }
 
-/* Tags are stored in the packet class, rather then the ipv4-header class,
- * purely because the Ipv4Routing interface permits modifying of the header,
- * but allows for the packet to be manipulated freely
- */
-void
-Packet::AddTag(t_tag tag) {
-  m_tags.push_back(tag);
-}
-
-TagsI 
-Packet::GetTags() {
-  return m_tags.begin();
-}
-
-void
-Packet::RemoveTag(t_tag tag) {
-  m_tags.remove(tag);
-  free(tag);
-}
-
-Ipv4Address
-Packet::GetLastTagAddress() {
-  return m_lastTagAddress;
-}
-
-void
-Packet::SetLastTagAddress(Ipv4Address addr) {
-  m_lastTagAddress = addr;
-}
 Ptr<Packet>
 Packet::CreateFragment (uint32_t start, uint32_t length) const
 {
