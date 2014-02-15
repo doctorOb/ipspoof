@@ -1,0 +1,7 @@
+#ignore various latex intermediary output files
+*.fdb_latexmk
+*.aux
+*.synctex.gz
+*.aux
+*.log
+ns-allinone-3.19/*

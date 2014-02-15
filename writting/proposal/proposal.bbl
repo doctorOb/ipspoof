@@ -1,0 +1,20 @@
+\begin{thebibliography}{1}
+
+\bibitem{Hu}
+Yih-Chun Hu, Markus Jakobsson, and Adrian Perrig.
+\newblock Efficient constructions for one-way hash chains.
+\newblock In John Ioannidis, Angelos Keromytis, and Moti Yung, editors, {\em
+  Applied Cryptography and Network Security}, volume 3531 of {\em Lecture Notes
+  in Computer Science}, pages 423--441. Springer Berlin Heidelberg, 2005.
+
+\bibitem{rfc6238}
+D.~M'Raihi, S.~Machani, M.~Pei, and J.~Rydell.
+\newblock {TOTP: Time-Based One-Time Password Algorithm}.
+\newblock RFC 6238 (Informational), May 2011.
+
+\bibitem{Shue20081567}
+Craig~A. Shue, Minaxi Gupta, and Matthew~P. Davy.
+\newblock Packet forwarding with source verification.
+\newblock {\em Computer Networks}, 52(8):1567 -- 1582, 2008.
+
+\end{thebibliography}

@@ -1,0 +1,32 @@
+\documentclass[12pt]{article}
+	\usepackage{xcolor}
+	\usepackage[tmargin=1in,bmargin=1in,lmargin=1.25in,rmargin=1.25in]{geometry}
+
+\usepackage{setspace}
+	\onehalfspacing
+
+\begin{document}
+
+	\bf{Needs}
+	\begin{itemize}
+		\item IP spoofing counter measures that play well with existing infrastructure
+		\item Packet forwarding is done on destination IP, with no concern for source, which permits IP spoofing. 
+			This faciliates numerous types of network attacks, such as Denial of Service and Man in the Middle. 
+			A forwarding protocol which either eliminates or gravely reduces the likelihood of spoofing effectively 
+			prevents these issues at the source.
+		\item 
+	\end{itemize}
+	
+
+
+
+
+	\section{Notes}
+		\begin{itemize}
+			\item Currently techniques aim to \italic{traceback} packet flows in order to identify the malicious source. Others try to protect the destination.
+			\item Tags should not be changed often to avoid the overhead of relearning. But static tags present a possibility of theft. Perhaps, the tags could evolve over time, perhaps in every minute interval, with a set function being applied to them. This could mirror the use of unix intervals in the OTP schema used by google. Instead of {[}prefix, tag{]} being stored and indexed, it could be {[}prefix, raw_tag, mask{]}. Each tagging router would use bitwise operations on both the mask and the unix time interval to generate a tag which was only valid for the interval duration (on the order of 1-30s). This would ensure that if a tag was compromised, it would only be valid for a short duration. Only when an implementing router becomes nefarious, can the tag + mask be stolen.
+		\end{itemize}
+
+
+
+\end{document}
