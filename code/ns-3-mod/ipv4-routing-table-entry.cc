@@ -67,12 +67,12 @@ PTag::GetTransportTag(int interval) {
 
   time_t current_time = time(NULL) & 0xfffffff0;
   int n = (current_time - m_chain_start_time) >> 8;
-  if (n >= 2880){
+  if (n >= CHAIN_LENGTH){
     m_seed_counter++;
     m_chain_start_time = current_time;
-    m_chain[0] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
-    for (n = 1; n < 2880; n++){
-      m_chain[n] = XXH_small(m_chain[n-1], 4, m_seed_counter);
+    m_chain[CHAIN_LENGTH-1] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
+    for (n = CHAIN_LENGTH-2; n >=0; n--){
+      m_chain[n] = XXH_small(m_chain[n+1], 4, m_seed_counter);
     }
     n = 0;
   }
