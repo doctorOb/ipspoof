@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{ns-3-routing}
+Routing overview — ns-3 vns-3.10 documentation, February 2014.
+
+\bibitem{xxhash}
+xxhash - extremely fast non cryptographic hash, February 2014.
+
+\bibitem{Shue20081567}
+Craig~A. Shue, Minaxi Gupta, and Matthew~P. Davy.
+\newblock Packet forwarding with source verification.
+\newblock {\em Computer Networks}, 52(8):1567 -- 1582, 2008.
+
+\end{thebibliography}
