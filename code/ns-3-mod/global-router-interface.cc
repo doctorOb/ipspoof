@@ -543,9 +543,9 @@ GlobalRouter::GetRoutingProtocol (void)
 }
 
 void
-GlobalRouter::EnableTagMode()
+GlobalRouter::EnableTagMode(bool useChaining)
 {
-  m_routingProtocol->ToggleTagMode(true);
+  m_routingProtocol->ToggleTagMode(useChaining);
   m_routingProtocol->SetOwnAddress(m_ownAddress);
 }
 

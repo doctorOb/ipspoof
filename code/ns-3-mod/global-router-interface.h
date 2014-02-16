@@ -601,9 +601,9 @@ public:
   void SetRoutingProtocol (Ptr<Ipv4GlobalRouting> routing);
 
   /**
-  * Enable the tag inspection protocol for this specific router
+  * Enable the tag inspection protocol for this specific router. Optionally enables hash chaining
   */
-  void EnableTagMode(void);
+  void EnableTagMode(bool useChaining);
 
   //references m_ownAddress
 

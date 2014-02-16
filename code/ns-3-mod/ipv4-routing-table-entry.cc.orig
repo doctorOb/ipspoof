@@ -62,6 +62,22 @@ PTag::~PTag() {
 //value will rewind the interval (for edge cases where the interval changes durring transport)
 t_tag
 PTag::GetTransportTag(int interval) {
+<<<<<<< HEAD
+  uint32_t raw_time = (uint32_t) (time(NULL);
+  uint32_t offset = (uint32_t) interval * 16;
+  uint32_t t_interval = (raw_time & 0xfffffff0) - offset;
+
+  return XXH_small(m_baseTag, 4, t_interval);
+
+  time_t current_time = time(NULL) & 0xfffffff0;
+  int n = (current_time - m_chain_start_time) >> 8;
+  if (n >= CHAIN_LENGTH){
+    m_seed_counter++;
+    m_chain_start_time = current_time;
+    m_chain[CHAIN_LENGTH-1] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
+    for (n = CHAIN_LENGTH-2; n >=0; n--){
+      m_chain[n] = XXH_small(m_chain[n+1], 4, m_seed_counter);
+=======
 
   if (m_use_chain) {
     uint32_t raw_time = (uint32_t) (time(NULL);
@@ -72,14 +88,15 @@ PTag::GetTransportTag(int interval) {
   } else {
     time_t current_time = time(NULL) & 0xfffffff0;
     int n = (current_time - m_chain_start_time) >> 8;
-    if (n >= CHAIN_LENGTH){
+    if (n >= 2880){
       m_seed_counter++;
       m_chain_start_time = current_time;
-      m_chain[CHAIN_LENGTH-1] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
-      for (n = CHAIN_LENGTH-2; n >=0; n--){
-        m_chain[n] = XXH_small(m_chain[n+1], 4, m_seed_counter);
+      m_chain[0] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
+      for (n = 1; n < 2880; n++){
+        m_chain[n] = XXH_small(m_chain[n-1], 4, m_seed_counter);
       }
       n = 0;
+>>>>>>> added chainging toggle
     }
 
     return m_chain[n];

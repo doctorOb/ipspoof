@@ -99,8 +99,8 @@ public:
   virtual void SetIpv4 (Ptr<Ipv4> ipv4);
   virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const;
 
-  /*enable the functionality for tag mode (used by the GlobalRouter object to control % deployment)*/
-  void ToggleTagMode(bool val);
+  /*enable the functionality for tag mode, optionally enable the hash chain functionality*/
+  void ToggleTagMode(bool useChain);
 
   /*set the router's acting IP address*/
   void SetOwnAddress(Ipv4Address addr);

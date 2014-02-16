@@ -47,7 +47,7 @@ typedef uint32_t[CHAIN_LENGTH] xhash_chain;
 class PTag {
 
 public:
-  PTag(Ipv4Address routerAddr);
+  PTag(Ipv4Address routerAddr, bool useChain);
   ~PTag();
   t_tag GetTransportTag(int interval);
   uint32_t XXH_small(const void* key, int len, unsigned int seed);
@@ -56,13 +56,14 @@ private:
   xhash_chain m_chain; //a chain of all the hashes
   time_t m_chain_start_time; //time the current hash chain was generated
   unsigned int m_seed_counter; //seed counter for hash chains
+  bool m_use_chain; //defaults to false, set if this PTag should generate a hash chain
 };
 
 class TagTableEntry {
 
 public:
 
-  TagTableEntry(uint32_t interface, Ipv4Address addr, Ipv4Mask subnet);
+  TagTableEntry(uint32_t interface, Ipv4Address addr, Ipv4Mask subnet, bool useChain);
 
   PTag* GetTag();
 

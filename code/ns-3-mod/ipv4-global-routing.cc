@@ -79,10 +79,11 @@ Ipv4GlobalRouting::~Ipv4GlobalRouting ()
 
 
 void
-Ipv4GlobalRouting::ToggleTagMode(bool val)
+Ipv4GlobalRouting::ToggleTagMode(bool useChain)
 {
   NS_LOG_INFO("Enabling Tag Mode for router");
-  m_inspectPacketTags = val;
+  m_inspectPacketTags = true;
+  m_use_chaining = true;
 }
 
 void
@@ -92,7 +93,7 @@ Ipv4GlobalRouting::SetOwnAddress(Ipv4Address addr)
   Ipv4Mask *mask = new Ipv4Mask("255.255.255.0");
   m_ownAddress = addr.CombineMask(*mask);
   NS_LOG_INFO("My address is: " << m_ownAddress);
-  m_ownTag = new PTag(addr);
+  m_ownTag = new PTag(addr,m_use_chaining);
 }
 
 void 
