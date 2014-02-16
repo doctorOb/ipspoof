@@ -57,9 +57,46 @@ PTag::~PTag() {
 //value will rewind the interval (for edge cases where the interval changes durring transport)
 t_tag
 PTag::GetTransportTag(int interval) {
-  t_tag hash = 55;
-  //generate the hashTag, combine it with time
-  return hash;
+  uint32_t raw_time = (uint32_t) (time(NULL);
+  uint32_t offset = (uint32_t) interval * 16;
+  uint32_t t_interval = (raw_time & 0xfffffff0) - offset;
+
+  return XXH_small(m_baseTag, 4, t_interval);
+}
+
+uint32_t
+PTag::XXH_small(const void* key, int len, unsigned int seed)
+{
+        const unsigned char* p = (unsigned char*)key;
+        const unsigned char* const bEnd = p + len;
+        unsigned int idx = seed + PRIME1;
+        unsigned int crc = PRIME5;
+        const unsigned char* const limit = bEnd - 4;
+
+        while (p<limit)
+        {
+                crc += ((*(unsigned int*)p) + idx++);
+                crc += (crc << 17) * PRIME4;
+                crc *= PRIME1;
+                p+=4;
+        }
+
+        while (p<bEnd)
+        {
+                crc += ((*p) + idx++);
+                crc *= PRIME1;
+                p++;
+        }
+
+        crc += len;
+
+        crc ^= crc >> 15;
+        crc *= PRIME2;
+        crc ^= crc >> 13;
+        crc *= PRIME3;
+        crc ^= crc >> 16;
+
+        return (uint32_t) crc;
 }
 
 /*
@@ -110,8 +147,7 @@ TagTableEntry::Matches(Ipv4Address addr) {
 bool
 TagTableEntry::VerifyTag(t_tag other) {
   //hash, timestamp, ect
-  t_tag mine = m_tag->GetTransportTag(0);
-  return mine == other;
+  return m_tag->GetTransportTag(0) != other || m_tag->GetTransportTag(1) != other)
 }
 
 

@@ -17,446 +17,313 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
+#ifndef IPV4_ROUTING_TABLE_ENTRY_H
+#define IPV4_ROUTING_TABLE_ENTRY_H
 
-#include "ipv4-routing-table-entry.h"
-#include "ns3/assert.h"
-#include "ns3/log.h"
+#include <list>
+#include <vector>
+#include <ostream>
 
-#define TAG_LEN 128
+#include "ns3/ipv4-address.h"
+#include "ns3/ipv4-header.h" // for tag typedef
 
-NS_LOG_COMPONENT_DEFINE ("Ipv4RoutingTableEntry");
+#define PRIME1 2654435761U
+#define PRIME2 2246822519U
+#define PRIME3 3266489917U
+#define PRIME4 668265263U
+#define PRIME5 0x165667b1
 
 namespace ns3 {
 
-
-
-/*****************************************************
-      Packet Tag implementation
-******************************************************/
-
-
-
-/* 
-  Actual tag object. Stored in some base format, hook here to perform hashing
-*/
-//generate a base tag from the incoming network address
-//this is used to deterministically build all tag tables at each router
-PTag::PTag(Ipv4Address routerAddr) {
-  uint8_t * m_baseTag = (uint8_t *) malloc(4);
-  routerAddr.Serialize(m_baseTag);
-}
-
-PTag::~PTag() {
-  if (m_baseTag != NULL){
-    free(m_baseTag);
-  }
-}
-
-//Get the hashed variant of the base tag. The interval argument dictates which
-//unix time interval to use. If this is 0, the current interval is used. Any other 
-//value will rewind the interval (for edge cases where the interval changes durring transport)
-t_tag
-PTag::GetTransportTag(int interval) {
-  t_tag hash = 55;
-  //generate the hashTag, combine it with time
-  return hash;
-}
-
 /*
-  Network tag table entry class. Tags are stored as unsigned long longs
+  A wrapper class for the packet tag implementation. Holds the base tag, and 
+  is in charge of computing the secured transport ready tag, as well as verifying
+  against other tags.
 */
 
+typedef std::list<uint32_t> xhash_chain;
+class PTag {
 
-//NOTE: It may not be necessary to explicitly pass both address and subnet mask
-//as the address may already be a network address
-TagTableEntry::TagTableEntry(uint32_t interface, Ipv4Address addr, Ipv4Mask subnet) {
-  m_tag = new PTag(addr.CombineMask(subnet));
-  m_interface = interface;
-  m_addr = addr;
-  m_subnet = subnet;
-}
+public:
+  PTag(Ipv4Address routerAddr);
+  ~PTag();
+  t_tag GetTransportTag(int interval);
+  uint32_t XXH_small(const void* key, int len, unsigned int seed);
+private:
+  uint8_t* m_baseTag; //basically, a raw IP address
+  xhash_chain m_chain; //a chain of all the hashes
+};
 
-PTag*
-TagTableEntry::GetTag(void) {
-  return m_tag;
-}
+class TagTableEntry {
 
-uint32_t
-TagTableEntry::GetInterface(void) {
-  return m_interface;
-}
+public:
 
-Ipv4Address
-TagTableEntry::GetAddress(void) {
-  return m_addr;
-}
+  TagTableEntry(uint32_t interface, Ipv4Address addr, Ipv4Mask subnet);
 
-Ipv4Mask
-TagTableEntry::GetSubnet(void) {
-  return m_subnet;
-}
+  PTag* GetTag();
 
-Ipv4Address
-TagTableEntry::GetNetAddress(void) {
-  return m_addr.CombineMask(m_subnet);
-}
+  uint32_t GetInterface();
 
-bool
-TagTableEntry::Matches(Ipv4Address addr) {
-  Ipv4Address combined = GetNetAddress();
-  return addr.CombineMask(m_subnet).IsEqual(combined);
-}
+  Ipv4Address GetAddress(void);
 
-bool
-TagTableEntry::VerifyTag(t_tag other) {
-  //hash, timestamp, ect
-  t_tag mine = m_tag->GetTransportTag(0);
-  return mine == other;
-}
+  Ipv4Address GetNetAddress(void);
 
+  Ipv4Mask GetSubnet(void);
 
-/*****************************************************
- *     Network Ipv4RoutingTableEntry
- *****************************************************/
+  bool Matches(Ipv4Address addr);
 
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry ()
-{
-  NS_LOG_FUNCTION (this);
-}
+  bool VerifyTag(t_tag other);
 
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4RoutingTableEntry const &route)
-  : m_dest (route.m_dest),
-    m_destNetworkMask (route.m_destNetworkMask),
-    m_gateway (route.m_gateway),
-    m_interface (route.m_interface)
-{
-  NS_LOG_FUNCTION (this << route);
-}
+private:
+  PTag* m_tag;
+  uint32_t m_interface;
+  Ipv4Address m_addr;
+  Ipv4Mask m_subnet;
+};
 
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4RoutingTableEntry const *route)
-  : m_dest (route->m_dest),
-    m_destNetworkMask (route->m_destNetworkMask),
-    m_gateway (route->m_gateway),
-    m_interface (route->m_interface)
-{
-  NS_LOG_FUNCTION (this << route);
-}
+/**
+ * \ingroup internet
+ *
+ * A record of an IPv4 routing table entry for Ipv4GlobalRouting and 
+ * Ipv4StaticRouting.  This is not a reference counted object.
+ */
+class Ipv4RoutingTableEntry {
+public:
+  /**
+   * \brief This constructor does nothing
+   */
+  Ipv4RoutingTableEntry ();
+  /**
+   * \brief Copy Constructor
+   * \param route The route to copy
+   */
+  Ipv4RoutingTableEntry (Ipv4RoutingTableEntry const &route);
+  /**
+   * \brief Copy Constructor
+   * \param route The route to copy
+   */
+  Ipv4RoutingTableEntry (Ipv4RoutingTableEntry const *route);
+  /**
+   * \return True if this route is a host route (mask of all ones); false otherwise
+   */
+  bool IsHost (void) const;
+  /**
+   * \return True if this route is not a host route (mask is not all ones); false otherwise
+   *
+   * This method is implemented as !IsHost ().
+   */
+  bool IsNetwork (void) const;
+  /**
+   * \return True if this route is a default route; false otherwise
+   */
+  bool IsDefault (void) const;
+  /**
+   * \return True if this route is a gateway route; false otherwise
+   */
+  bool IsGateway (void) const;
+  /**
+   * \return address of the gateway stored in this entry
+   */
+  Ipv4Address GetGateway (void) const;
+  /**
+   * \return The IPv4 address of the destination of this route
+   */
+  Ipv4Address GetDest (void) const;
+  /**
+   * \return The IPv4 network number of the destination of this route
+   */
+  Ipv4Address GetDestNetwork (void) const;
+  /**
+   * \return The IPv4 network mask of the destination of this route
+   */
+  Ipv4Mask GetDestNetworkMask (void) const;
+  /**
+   * \return The Ipv4 interface number used for sending outgoing packets
+   */
+  uint32_t GetInterface (void) const;
+  /**
+   * \return An Ipv4RoutingTableEntry object corresponding to the input parameters.
+   * \param dest Ipv4Address of the destination
+   * \param nextHop Ipv4Address of the next hop
+   * \param interface Outgoing interface 
+   */
+  static Ipv4RoutingTableEntry CreateHostRouteTo (Ipv4Address dest, 
+                                                  Ipv4Address nextHop,
+                                                  uint32_t interface);
+  /**
+   * \return An Ipv4RoutingTableEntry object corresponding to the input parameters.
+   * \param dest Ipv4Address of the destination
+   * \param interface Outgoing interface 
+   */
+  static Ipv4RoutingTableEntry CreateHostRouteTo (Ipv4Address dest, 
+                                                  uint32_t interface);
+  /**
+   * \return An Ipv4RoutingTableEntry object corresponding to the input parameters.
+   * \param network Ipv4Address of the destination network
+   * \param networkMask Ipv4Mask of the destination network mask
+   * \param nextHop Ipv4Address of the next hop
+   * \param interface Outgoing interface 
+   */
+  static Ipv4RoutingTableEntry CreateNetworkRouteTo (Ipv4Address network, 
+                                                     Ipv4Mask networkMask,
+                                                     Ipv4Address nextHop,
+                                                     uint32_t interface);
+  /**
+   * \return An Ipv4RoutingTableEntry object corresponding to the input parameters.
+   * \param network Ipv4Address of the destination network
+   * \param networkMask Ipv4Mask of the destination network mask
+   * \param interface Outgoing interface 
+   */
+  static Ipv4RoutingTableEntry CreateNetworkRouteTo (Ipv4Address network, 
+                                                     Ipv4Mask networkMask,
+                                                     uint32_t interface);
+  /**
+   * \return An Ipv4RoutingTableEntry object corresponding to the input 
+   * parameters.  This route is distinguished; it will match any 
+   * destination for which a more specific route does not exist.
+   * \param nextHop Ipv4Address of the next hop
+   * \param interface Outgoing interface 
+   */
+  static Ipv4RoutingTableEntry CreateDefaultRoute (Ipv4Address nextHop, 
+                                                   uint32_t interface);
 
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4Address dest,
-                                              Ipv4Address gateway,
-                                              uint32_t interface)
-  : m_dest (dest),
-    m_destNetworkMask (Ipv4Mask::GetOnes ()),
-    m_gateway (gateway),
-    m_interface (interface)
-{
-}
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4Address dest,
-                                              uint32_t interface)
-  : m_dest (dest),
-    m_destNetworkMask (Ipv4Mask::GetOnes ()),
-    m_gateway (Ipv4Address::GetZero ()),
-    m_interface (interface)
-{
-}
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4Address network,
-                                              Ipv4Mask networkMask,
-                                              Ipv4Address gateway,
-                                              uint32_t interface)
-  : m_dest (network),
-    m_destNetworkMask (networkMask),
-    m_gateway (gateway),
-    m_interface (interface)
-{
-  NS_LOG_FUNCTION (this << network << networkMask << gateway << interface);
-}
-Ipv4RoutingTableEntry::Ipv4RoutingTableEntry (Ipv4Address network,
-                                              Ipv4Mask networkMask,
-                                              uint32_t interface)
-  : m_dest (network),
-    m_destNetworkMask (networkMask),
-    m_gateway (Ipv4Address::GetZero ()),
-    m_interface (interface)
-{
-  NS_LOG_FUNCTION (this << network << networkMask << interface);
-}
+private:
+  /**
+   * \brief Constructor.
+   * \param network network address
+   * \param mask network mask
+   * \param gateway the gateway
+   * \param interface the interface index
+   */
+  Ipv4RoutingTableEntry (Ipv4Address network,
+                         Ipv4Mask mask,
+                         Ipv4Address gateway,
+                         uint32_t interface);
+  /**
+   * \brief Constructor.
+   * \param dest destination address
+   * \param mask network mask
+   * \param interface the interface index
+   */
+  Ipv4RoutingTableEntry (Ipv4Address dest,
+                         Ipv4Mask mask,
+                         uint32_t interface);
+  /**
+   * \brief Constructor.
+   * \param dest destination address
+   * \param gateway the gateway
+   * \param interface the interface index
+   */
+  Ipv4RoutingTableEntry (Ipv4Address dest,
+                         Ipv4Address gateway,
+                         uint32_t interface);
+  /**
+   * \brief Constructor.
+   * \param dest destination address
+   * \param interface the interface index
+   */
+  Ipv4RoutingTableEntry (Ipv4Address dest,
+                         uint32_t interface);
 
-bool
-Ipv4RoutingTableEntry::IsHost (void) const
-{
-  NS_LOG_FUNCTION (this);
-  if (m_destNetworkMask.IsEqual (Ipv4Mask::GetOnes ()))
-    {
-      return true;
-    }
-  else
-    {
-      return false;
-    }
-}
-Ipv4Address
-Ipv4RoutingTableEntry::GetDest (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_dest;
-}
-bool
-Ipv4RoutingTableEntry::IsNetwork (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return !IsHost ();
-}
-bool
-Ipv4RoutingTableEntry::IsDefault (void) const
-{
-  NS_LOG_FUNCTION (this);
-  if (m_dest.IsEqual (Ipv4Address::GetZero ()))
-    {
-      return true;
-    }
-  else
-    {
-      return false;
-    }
-}
-Ipv4Address
-Ipv4RoutingTableEntry::GetDestNetwork (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_dest;
-}
-Ipv4Mask
-Ipv4RoutingTableEntry::GetDestNetworkMask (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_destNetworkMask;
-}
-bool
-Ipv4RoutingTableEntry::IsGateway (void) const
-{
-  NS_LOG_FUNCTION (this);
-  if (m_gateway.IsEqual (Ipv4Address::GetZero ()))
-    {
-      return false;
-    }
-  else
-    {
-      return true;
-    }
-}
-Ipv4Address
-Ipv4RoutingTableEntry::GetGateway (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_gateway;
-}
-uint32_t
-Ipv4RoutingTableEntry::GetInterface (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_interface;
-}
+  Ipv4Address m_dest;         //!< destination address
+  Ipv4Mask m_destNetworkMask; //!< destination network mask
+  Ipv4Address m_gateway;      //!< gateway
+  uint32_t m_interface;       //!< output interface
+};
 
-Ipv4RoutingTableEntry 
-Ipv4RoutingTableEntry::CreateHostRouteTo (Ipv4Address dest, 
-                                          Ipv4Address nextHop,
-                                          uint32_t interface)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4RoutingTableEntry (dest, nextHop, interface);
-}
-Ipv4RoutingTableEntry 
-Ipv4RoutingTableEntry::CreateHostRouteTo (Ipv4Address dest,
-                                          uint32_t interface)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4RoutingTableEntry (dest, interface);
-}
-Ipv4RoutingTableEntry 
-Ipv4RoutingTableEntry::CreateNetworkRouteTo (Ipv4Address network, 
-                                             Ipv4Mask networkMask,
-                                             Ipv4Address nextHop,
-                                             uint32_t interface)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4RoutingTableEntry (network, networkMask, 
-                                nextHop, interface);
-}
-Ipv4RoutingTableEntry 
-Ipv4RoutingTableEntry::CreateNetworkRouteTo (Ipv4Address network, 
-                                             Ipv4Mask networkMask,
-                                             uint32_t interface)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4RoutingTableEntry (network, networkMask, 
-                                interface);
-}
-Ipv4RoutingTableEntry 
-Ipv4RoutingTableEntry::CreateDefaultRoute (Ipv4Address nextHop, 
-                                           uint32_t interface)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4RoutingTableEntry (Ipv4Address::GetZero (), nextHop, interface);
-}
+/**
+ * \brief Stream insertion operator.
+ *
+ * \param os the reference to the output stream
+ * \param route the Ipv4 routing table entry
+ * \returns the reference to the output stream
+ */
+std::ostream& operator<< (std::ostream& os, Ipv4RoutingTableEntry const& route);
 
+/**
+ * \ingroup internet
+ *
+ * \brief A record of an IPv4 multicast route for Ipv4GlobalRouting and Ipv4StaticRouting
+ */
+class Ipv4MulticastRoutingTableEntry {
+public:
+  /**
+   * \brief This constructor does nothing
+   */
+  Ipv4MulticastRoutingTableEntry ();
 
-std::ostream& operator<< (std::ostream& os, Ipv4RoutingTableEntry const& route)
-{
-  if (route.IsDefault ())
-    {
-      NS_ASSERT (route.IsGateway ());
-      os << "default out=" << route.GetInterface () << ", next hop=" << route.GetGateway ();
-    }
-  else if (route.IsHost ())
-    {
-      if (route.IsGateway ())
-        {
-          os << "host="<< route.GetDest () << 
-          ", out=" << route.GetInterface () <<
-          ", next hop=" << route.GetGateway ();
-        }
-      else
-        {
-          os << "host="<< route.GetDest () << 
-          ", out=" << route.GetInterface ();
-        }
-    }
-  else if (route.IsNetwork ()) 
-    {
-      if (route.IsGateway ())
-        {
-          os << "network=" << route.GetDestNetwork () <<
-          ", mask=" << route.GetDestNetworkMask () <<
-          ",out=" << route.GetInterface () <<
-          ", next hop=" << route.GetGateway ();
-        }
-      else
-        {
-          os << "network=" << route.GetDestNetwork () <<
-          ", mask=" << route.GetDestNetworkMask () <<
-          ",out=" << route.GetInterface ();
-        }
-    }
-  else
-    {
-      NS_ASSERT (false);
-    }
-  return os;
-}
+  /**
+   * \brief Copy Constructor
+   * \param route The route to copy
+   */
+  Ipv4MulticastRoutingTableEntry (Ipv4MulticastRoutingTableEntry const &route);
+  /**
+   * \brief Copy Constructor
+   * \param route The route to copy
+   */
+  Ipv4MulticastRoutingTableEntry (Ipv4MulticastRoutingTableEntry const *route);
+  /**
+   * \return The IPv4 address of the source of this route
+   */
+  Ipv4Address GetOrigin (void) const;
+  /**
+   * \return The IPv4 address of the multicast group of this route
+   */
+  Ipv4Address GetGroup (void) const;
+  /**
+   * \return The IPv4 address of the input interface of this route
+   */
+  uint32_t GetInputInterface (void) const;
+  /**
+   * \return The number of output interfaces of this route
+   */
+  uint32_t GetNOutputInterfaces (void) const;
+  /**
+   * \param n interface index
+   * \return A specified output interface.
+   */
+  uint32_t GetOutputInterface (uint32_t n) const;
+  /**
+   * \return A vector of all of the output interfaces of this route.
+   */
+  std::vector<uint32_t> GetOutputInterfaces (void) const;
+  /**
+   * \return Ipv4MulticastRoutingTableEntry corresponding to the input parameters.
+   * \param origin Source address for the multicast route 
+   * \param group Group destination address for the multicast route
+   * \param inputInterface Input interface that multicast datagram must be received on
+   * \param outputInterfaces vector of output interfaces to copy and forward the datagram to
+   */
+  static Ipv4MulticastRoutingTableEntry CreateMulticastRoute (Ipv4Address origin, 
+                                                              Ipv4Address group, uint32_t inputInterface,
+                                                              std::vector<uint32_t> outputInterfaces);
 
-/*****************************************************
- *     Ipv4MulticastRoutingTableEntry
- *****************************************************/
+private:
+  /**
+   * \brief Constructor.
+   * \param origin source address
+   * \param group destination address
+   * \param inputInterface input interface
+   * \param outputInterfaces output interfaces
+   */
+  Ipv4MulticastRoutingTableEntry (Ipv4Address origin, Ipv4Address group, 
+                                  uint32_t inputInterface, std::vector<uint32_t> outputInterfaces);
 
-Ipv4MulticastRoutingTableEntry::Ipv4MulticastRoutingTableEntry ()
-{
-  NS_LOG_FUNCTION (this);
-}
+  Ipv4Address m_origin;   //!< source address
+  Ipv4Address m_group;    //!< destination address
+  uint32_t m_inputInterface;    //!< input interface
+  std::vector<uint32_t> m_outputInterfaces;   //!< output interfaces
+};
 
-Ipv4MulticastRoutingTableEntry::Ipv4MulticastRoutingTableEntry (Ipv4MulticastRoutingTableEntry const &route)
-  :
-    m_origin (route.m_origin),
-    m_group (route.m_group),
-    m_inputInterface (route.m_inputInterface),
-    m_outputInterfaces (route.m_outputInterfaces)
-{
-  NS_LOG_FUNCTION (this << route);
-}
-
-Ipv4MulticastRoutingTableEntry::Ipv4MulticastRoutingTableEntry (Ipv4MulticastRoutingTableEntry const *route)
-  :
-    m_origin (route->m_origin),
-    m_group (route->m_group),
-    m_inputInterface (route->m_inputInterface),
-    m_outputInterfaces (route->m_outputInterfaces)
-{
-  NS_LOG_FUNCTION (this << route);
-}
-
-Ipv4MulticastRoutingTableEntry::Ipv4MulticastRoutingTableEntry (
-  Ipv4Address origin, 
-  Ipv4Address group, 
-  uint32_t inputInterface, 
-  std::vector<uint32_t> outputInterfaces)
-{
-  NS_LOG_FUNCTION (this << origin << group << inputInterface << &outputInterfaces);
-  m_origin = origin;
-  m_group = group;
-  m_inputInterface = inputInterface;
-  m_outputInterfaces = outputInterfaces;
-}
-
-Ipv4Address 
-Ipv4MulticastRoutingTableEntry::GetOrigin (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_origin;
-}
-
-Ipv4Address 
-Ipv4MulticastRoutingTableEntry::GetGroup (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_group;
-}
-
-uint32_t 
-Ipv4MulticastRoutingTableEntry::GetInputInterface (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_inputInterface;
-}
-
-uint32_t
-Ipv4MulticastRoutingTableEntry::GetNOutputInterfaces (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_outputInterfaces.size ();
-}
-
-uint32_t
-Ipv4MulticastRoutingTableEntry::GetOutputInterface (uint32_t n) const
-{
-  NS_LOG_FUNCTION (this << n);
-  NS_ASSERT_MSG (n < m_outputInterfaces.size (),
-                 "Ipv4MulticastRoutingTableEntry::GetOutputInterface (): index out of bounds");
-
-  return m_outputInterfaces[n];
-}
-
-std::vector<uint32_t>
-Ipv4MulticastRoutingTableEntry::GetOutputInterfaces (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return m_outputInterfaces;
-}
-
-Ipv4MulticastRoutingTableEntry 
-Ipv4MulticastRoutingTableEntry::CreateMulticastRoute (
-  Ipv4Address origin, 
-  Ipv4Address group, 
-  uint32_t inputInterface,
-  std::vector<uint32_t> outputInterfaces)
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return Ipv4MulticastRoutingTableEntry (origin, group, inputInterface, outputInterfaces);
-}
-
-std::ostream& 
-operator<< (std::ostream& os, Ipv4MulticastRoutingTableEntry const& route)
-{
-  os << "origin=" << route.GetOrigin () << 
-  ", group=" << route.GetGroup () <<
-  ", input interface=" << route.GetInputInterface () <<
-  ", output interfaces=";
-
-  for (uint32_t i = 0; i < route.GetNOutputInterfaces (); ++i)
-    {
-      os << route.GetOutputInterface (i) << " ";
-
-    }
-
-  return os;
-}
+/**
+ * \brief Stream insertion operator.
+ *
+ * \param os the reference to the output stream
+ * \param route the Ipv4 multicast routing table entry
+ * \returns the reference to the output stream
+ */
+std::ostream& operator<< (std::ostream& os, Ipv4MulticastRoutingTableEntry const& route);
 
 } // namespace ns3
+
+#endif /* IPV4_ROUTING_TABLE_ENTRY_H */
