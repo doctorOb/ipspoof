@@ -44,6 +44,8 @@ namespace ns3 {
 PTag::PTag(Ipv4Address routerAddr) {
   uint8_t * m_baseTag = (uint8_t *) malloc(4);
   routerAddr.Serialize(m_baseTag);
+  m_chain_start_time = 0;
+  m_seed_counter = 0;
 }
 
 PTag::~PTag() {
@@ -62,6 +64,20 @@ PTag::GetTransportTag(int interval) {
   uint32_t t_interval = (raw_time & 0xfffffff0) - offset;
 
   return XXH_small(m_baseTag, 4, t_interval);
+
+  time_t current_time = time(NULL) & 0xfffffff0;
+  int n = (current_time - m_chain_start_time) >> 8;
+  if (n >= 2880){
+    m_seed_counter++;
+    m_chain_start_time = current_time;
+    m_chain[0] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
+    for (n = 1; n < 2880; n++){
+      m_chain[n] = XXH_small(m_chain[n-1], 4, m_seed_counter);
+    }
+    n = 0;
+  }
+
+  return m_chain[n];
 }
 
 uint32_t

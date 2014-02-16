@@ -33,6 +33,8 @@
 #define PRIME4 668265263U
 #define PRIME5 0x165667b1
 
+#define CHAIN_LENGTH 2880
+
 namespace ns3 {
 
 /*
@@ -41,7 +43,7 @@ namespace ns3 {
   against other tags.
 */
 
-typedef std::list<uint32_t> xhash_chain;
+typedef uint32_t[CHAIN_LENGTH] xhash_chain;
 class PTag {
 
 public:
@@ -52,6 +54,8 @@ public:
 private:
   uint8_t* m_baseTag; //basically, a raw IP address
   xhash_chain m_chain; //a chain of all the hashes
+  time_t m_chain_start_time; //time the current hash chain was generated
+  unsigned int m_seed_counter; //seed counter for hash chains
 };
 
 class TagTableEntry {
