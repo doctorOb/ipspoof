@@ -4,8 +4,5 @@
 *.synctex.gz
 *.aux
 *.log
-<<<<<<< HEAD
-=======
 .DS_Store
->>>>>>> updated ignore
-ns-allinone-3.19/*
+papers/*
