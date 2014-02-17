@@ -107,7 +107,7 @@ Ipv4GlobalRouting::AddTagToTable (Ipv4Mask subnet,
   }
 
   //NS_LOG_INFO("Adding IP with mask: " << addr << " to tag table");
-  TagTableEntry* entry = new TagTableEntry(interface,addr,subnet);
+  TagTableEntry* entry = new TagTableEntry(interface,addr,subnet,m_use_chaining);
   m_tagTable.push_back(entry);
 }
 

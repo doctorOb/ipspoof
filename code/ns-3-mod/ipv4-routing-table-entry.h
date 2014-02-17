@@ -43,16 +43,16 @@ namespace ns3 {
   against other tags.
 */
 
-typedef uint32_t[CHAIN_LENGTH] xhash_chain;
+typedef uint32_t* xhash_chain;
 class PTag {
 
 public:
   PTag(Ipv4Address routerAddr, bool useChain);
   ~PTag();
   t_tag GetTransportTag(int interval);
-  uint32_t XXH_small(const void* key, int len, unsigned int seed);
+  uint32_t XXH_small(uint32_t key, unsigned int seed);
 private:
-  uint8_t* m_baseTag; //basically, a raw IP address
+  uint32_t m_baseTag; //basically, a raw IP address
   xhash_chain m_chain; //a chain of all the hashes
   time_t m_chain_start_time; //time the current hash chain was generated
   unsigned int m_seed_counter; //seed counter for hash chains

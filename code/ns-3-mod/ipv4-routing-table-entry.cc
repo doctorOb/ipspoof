@@ -42,18 +42,18 @@ namespace ns3 {
 //generate a base tag from the incoming network address
 //this is used to deterministically build all tag tables at each router
 PTag::PTag(Ipv4Address routerAddr,bool use_chain) {
-  uint8_t * m_baseTag = (uint8_t *) malloc(4);
-  routerAddr.Serialize(m_baseTag);
+  m_baseTag = routerAddr.Get();
   m_use_chain = use_chain;
   if (m_use_chain) {
     m_chain_start_time = 0;
     m_seed_counter = 0;
+    m_chain = (uint32_t*) malloc(CHAIN_LENGTH*sizeof(uint32_t));
   }
 }
 
 PTag::~PTag() {
-  if (m_baseTag != NULL){
-    free(m_baseTag);
+  if (m_use_chain) {
+    free(m_chain);
   }
 }
 
@@ -64,20 +64,20 @@ t_tag
 PTag::GetTransportTag(int interval) {
 
   if (m_use_chain) {
-    uint32_t raw_time = (uint32_t) (time(NULL);
+    uint32_t raw_time = (uint32_t) (time(NULL));
     uint32_t offset = (uint32_t) interval * 16;
     uint32_t t_interval = (raw_time & 0xfffffff0) - offset;
 
-    return XXH_small(m_baseTag, 4, t_interval);
+    return XXH_small(m_baseTag, t_interval);
   } else {
     time_t current_time = time(NULL) & 0xfffffff0;
     int n = (current_time - m_chain_start_time) >> 8;
     if (n >= CHAIN_LENGTH){
       m_seed_counter++;
       m_chain_start_time = current_time;
-      m_chain[CHAIN_LENGTH-1] = XXH_small(XXH_small(hash, 4, m_seed_counter), 4, m_seed_counter);
+      m_chain[CHAIN_LENGTH-1] = XXH_small(XXH_small(m_baseTag, m_seed_counter), m_seed_counter);
       for (n = CHAIN_LENGTH-2; n >=0; n--){
-        m_chain[n] = XXH_small(m_chain[n+1], 4, m_seed_counter);
+        m_chain[n] = XXH_small(m_chain[n+1], m_seed_counter);
       }
       n = 0;
     }
@@ -87,13 +87,15 @@ PTag::GetTransportTag(int interval) {
 }
 
 uint32_t
-PTag::XXH_small(const void* key, int len, unsigned int seed)
+PTag::XXH_small(uint32_t key, unsigned int seed)
 {
-        const unsigned char* p = (unsigned char*)key;
-        const unsigned char* const bEnd = p + len;
+        int len = 4;
+        unsigned char* p = (unsigned char*) malloc(4);
+        memcpy(p, (unsigned char*) &key, 4);
+        unsigned char* bEnd = p + len;
         unsigned int idx = seed + PRIME1;
         unsigned int crc = PRIME5;
-        const unsigned char* const limit = bEnd - 4;
+        unsigned char* limit = bEnd - 4;
 
         while (p<limit)
         {
@@ -169,7 +171,7 @@ TagTableEntry::Matches(Ipv4Address addr) {
 bool
 TagTableEntry::VerifyTag(t_tag other) {
   //hash, timestamp, ect
-  return m_tag->GetTransportTag(0) != other || m_tag->GetTransportTag(1) != other)
+  return m_tag->GetTransportTag(0) != other || m_tag->GetTransportTag(1) != other;
 }
 
 

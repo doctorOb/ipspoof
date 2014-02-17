@@ -78,6 +78,8 @@ main (int argc, char *argv[])
   cmd.AddValue ("EnableMonitor", "Enable Flow Monitor", enableFlowMonitor);
   cmd.Parse (argc, argv);
 
+  bool useChaining = true; //use the hash chaining approach for packet tag generation/inspection
+
   // Here, we will explicitly create four nodes.  In more sophisticated
   // topologies, we could configure a node factory.
   NS_LOG_INFO ("Create nodes.");
@@ -152,7 +154,7 @@ main (int argc, char *argv[])
       rtr->SetRouterAddress(ip);
       if ((rand() % 100 + 1) < PERCENT_DEPLOYMENT) {
         NS_LOG_INFO("Enabling Tag Mode for node:" << count);
-        rtr->EnableTagMode();
+        rtr->EnableTagMode(useChaining);
       }
 
   }

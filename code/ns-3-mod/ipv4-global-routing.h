@@ -294,6 +294,7 @@ private:
 
   Ipv4Address m_ownAddress;           //address that this router 
   PTag* m_ownTag;                     //Packet tag that this router should add to each packet
+  bool m_use_chaining;                //enable packet tag hash chains
 
   NetworkRoutes m_networkRoutes;       //!< Routes to networks
   ASExternalRoutes m_ASexternalRoutes; //!< External routes imported
