@@ -13,8 +13,12 @@ Date:
 
 
 !! Below is a list of .cc and header files that we modified in the NS-3 source. We tested our project using
-the latest version of ns-3 (v.3.19), which can be found at https://www.nsnam.org/release/ns-allinone-3.19.tar.bz2
+the latest version of ns-3 (v.3.19), which can be found at https://www.nsnam.org/releases/
 
+Uncompress the ns-allinons tarball. We've included a shell script which copies our modified ns-3 source files into 
+their appropriate locations relative to the directory which you put ns-allinons-3.19 in. The script, apply_patch.sh, is
+located in the code folder, and must be provided the path to your ns-allinons-3.19 directory as its first argument. For 
+example, I have mine installed in /Users/danrobertson/pg/ns-allinons-3.19, so I would provide that full path to the script.
 
 In order to run our test script (called second.cc), you must first build ns-3 using the build.py file in the root directory
 (typically, ns-allinone-3.19, assuming you haven't renamed it). You'll need to pass '--enable-examples' to 
@@ -22,10 +26,10 @@ build.py in order to compile our demo script. In order to view output and log in
 you need to enable the log component for Ipv4GlobalRouting. Do this from the command line by executing:
 	export NS_LOG=Ipv4GlobalRouting
 
-Next, to run the script, you'll need to run:
+Next, to run the script, change into the ns-3.19 directory, then you'll need to run:
 	./waf --run second
 
-Out of the ns-3.19 directory. You should see output coming from each router as it receives each packet.
+You should see output coming from each router as it receives each packet.
 
 ====Global Router Interface====
 "This class turns a node into a global router, implementing the globalrouting protocol. We hooked in here to 
