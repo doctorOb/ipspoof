@@ -76,7 +76,7 @@ Dr. Craig Shue % Supervisor's Name
 
 \section{Results and evaluation of our two approaches}
 
-After implementing the hash-chain and TOTP-inspired protocols using NS-3, analysis of the results has shown that both methods offer significant security benefits without causing problems with performance. Each of the two appraches has its own advantages; in this section we will examine these differences and explain how each of the hash functions affect security and performance.
+After implementing the hash-chain and TOTP-inspired protocols using NS-3, analysis of the results has shown that both methods offer significant security benefits without causing problems with performance. Each of the two approaches has its own advantages; in this section we will examine these differences and explain how each of the hash functions affect security and performance.
 
 The time interval we used for both methods was about half a minute (32 seconds) but could easily be adjusted to add security or space-efficiency. With the hash-chain approach, a compromised hash can only be exploited within the duration of the time interval it was created with. Even with pre-calculated rainbow tables, xxHash and MD5 hashes could not be cracked that quickly. Also, no matter how many hashes we captured, we were not able to determine the original tag (mostly due to colisions) which prevents an attacker from determining future hashes. The only downside of this approach is space complexity. If the interval is roughly half a minute and one day of hashes are generated at a time, 2880 hashes must be stored in RAM. As the time interval gets smaller, this number grows significantly. Using a 128-bit hash like MD5 will also use up four times as much memory as a 32-bit hash like xxHash. With that said, these issues can be negated increasing how often the hashes are generated (i.e. twice a day).
 
@@ -93,8 +93,7 @@ So why not use xxHash in any context? xxHash is not a cryptographic hashing algo
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
-\bibliography{references.bib}
-\bibliographystyle{plain}
+%\bibliography{references.bib}
 
 %----------------------------------------------------------------------------------------
 
