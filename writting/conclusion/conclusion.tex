@@ -1,0 +1,97 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt]{article} % Default font size is 12pt, it can be changed here
+
+\usepackage{geometry} % Required to change the page size to A4
+\geometry{a4paper} % Set the page size to be A4 as opposed to the default US Letter
+
+\usepackage{graphicx} % Required for including pictures
+
+\usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
+\usepackage{wrapfig} % Allows in-line images such as the example fish picture
+\usepackage{psfrag,amsmath,amsfonts,amsthm,amssymb,cite}
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\linespread{1.2} % Line spacing
+
+%\setlength\parindent{0pt} % Uncomment to remove all indentation from paragraphs
+
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+
+\textsc{\LARGE CS4516: Project Conclusion}\\[1.5cm] % Name of your university/college
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Tag-Based IP Spoofing Prevention Under Low Deployment Scenarios}\\[0.4cm] % Title of your document
+\HRule \\[1.5cm]
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Michael Calder\\
+Daniel Robertson\\
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisor:} \\
+Dr. Craig Shue % Supervisor's Name
+\end{flushright}
+\end{minipage}\\[4cm]
+
+{\large \today}\\[3cm] % Date, change the \today to a set date if you want to be precise
+
+%\includegraphics{Logo}\\[1cm] % Include a department/university logo - this will require the graphicx package
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\tableofcontents % Include a table of contents
+
+\newpage % Begins the essay on a new page instead of on the same page as the table of contents 
+
+
+%----------------------------------------------------------------------------------------
+% -- Paper Outline --
+%----------------------------------------------------------------------------------------
+
+\section{Future Work}
+
+We suggest additional security measures, which when combined with our modifications, would further the strength of Shue et. al's protocol. As the protocol is plug and play, the base tags must be distributed over the network before they can be used. This exposes the raw tags during initial deployment, and threaten to undermine our efforts of securing the tags in subsequent exchanges. The initial dispersion of these tags could therefore benefit from encryption. A na\"{i}ve approach would be to use Public key infrastructure, encrypting with the recipient router's public key. However, as noted by Shue et al., the overhead associated with cryptographic operations would severely limit packet throughput. 
+
+\section{Conclusion}
+
+Our research adds a lightweight security layer on top of the packet tagging protocol proposed by Shue et. al. In a realistic scenario where deployment is slow, tag theft presents ample opportunity for circumventing the spoofing measures. We've shown through our analysis that hashing base tags for transportation renders compromised tags unusable. By using hash chains constructed through a very fast non-cryptographic algorithm, we ensure that the tag exchange does not become stale. We've shown that this simple extension of Shue et. al's original protocol will mend initial tag security concerns. This will hopefully further incentivize initial adoption of the original protocol. 
+
+
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+%\bibliography{references.bib}
+%\bibliographystyle{plain}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
