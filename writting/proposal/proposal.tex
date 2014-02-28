@@ -100,7 +100,7 @@ Dr. Craig Shue % Supervisor's Name
 
 	Our implementation and analysis of this extended protocol will focus more heavily on tag exchange within a low deployment topology, where the assumption is made that tags have already been distributed and learned by deploying routers. As our proposal aims to add security mechanisms to an initialized network, we will not implement any of the tag discovery/exchange mechanisms detailed in \cite{Shue20081567}. Instead, our implementation will emulate an arbitrary exchange between two end hosts across a network whose deploying routers have fully built tag tables. The focus is thus on the overhead of differing token generating mechanism to the existing protocol, and the effectiveness of the added security. We will design a set of evaluation metrics to use for testing the strength of generated tokens, should they be stolen. This will likely include pre-image and collision resistance.
 
-	We will use NS-3 to create and test our protocol. We plan to spend more time in its native C++ library, using the python bindings for high level simulations. [drob]
+	We will use NS-3 to create and test our protocol. We plan to spend more time in its native C++ library, using the python bindings for high level simulations. NS-3 provides an Ipv4RoutingProtocol interface which exposes two primary methods, RouteInput and RouteOutput. We will extend these functions to preform the necessary tag inspection logic, passing or dropping the packets accordingly. Conveniently, NS-3's packet implementation provides an API for attaching attributes to packets that persist through a packets lifespan, called Tags. Implementing our protocols tags as a Tag allows for an easy implementation of the protocol.
 
 \section{Benefits}
 
@@ -110,9 +110,9 @@ Dr. Craig Shue % Supervisor's Name
 
 \section{Competition} 
 
-	Previous approaches to IP spoofing prevention include [drob]
+	Many approaches to preventing inter-domain IP spoofing (where attackers attempt to spoof IP addresses outside of their personal domain), already exist. Most prominent are those which attempt to trace the route of the attacking packet back to the (true) source, such as \cite{Taylor}. Shue et. al's approach follows more along the lines of packet filtering, ie. dropping packets near or around the source. Research such as \cite{rfc2827} perform ingress filtering, which drop spoofed packets from within the originating network, but fail to cover packets that escape into the wild.
 
-	The main competition to our proposed extended protocol is the existing tag-based protocol. While our enhancements provide better security guarantees, especially under partial deployment (an area where these guarantees are lacking), if the overhead proves to be too significant then the original protocol may be favored. In addition, given the case where the entire Internet conspires to implement the original protocol, the issues coming form low deployment would be bypassed, and our extended protocol would not be necessary.
+	But the main competition to our proposed extended protocol is the existing tag-based protocol. While our enhancements provide better security guarantees, especially under partial deployment (an area where these guarantees are lacking), if the overhead proves to be too significant then the original protocol may be favored. In addition, given the case where the entire Internet conspires to implement the original protocol, the issues coming form low deployment would be bypassed, and our extended protocol would not be necessary.
 
 
 %----------------------------------------------------------------------------------------
