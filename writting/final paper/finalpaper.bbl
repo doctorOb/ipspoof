@@ -23,4 +23,9 @@ Routing overview — ns-3 vns-3.10 documentation, February 2014.
 \bibitem{xxhash}
 xxhash - extremely fast non cryptographic hash, February 2014.
 
+\bibitem{rfc6238}
+D.~M'Raihi, S.~Machani, M.~Pei, and J.~Rydell.
+\newblock {TOTP: Time-Based One-Time Password Algorithm}.
+\newblock RFC 6238 (Informational), May 2011.
+
 \end{thebibliography}

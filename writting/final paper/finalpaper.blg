@@ -7,45 +7,45 @@ Warning--entry type for "ns-3-routing" isn't style-file defined
 --line 46 of file references.bib.bib
 Warning--entry type for "xxhash" isn't style-file defined
 --line 53 of file references.bib.bib
-You've used 5 entries,
+You've used 6 entries,
             1791 wiz_defined-function locations,
-            475 strings with 4135 characters,
-and the built_in function-call counts, 809 in all, are:
-= -- 63
-> -- 32
+            481 strings with 4270 characters,
+and the built_in function-call counts, 984 in all, are:
+= -- 75
+> -- 46
 < -- 0
-+ -- 13
-- -- 8
-* -- 48
-:= -- 121
-add.period$ -- 12
-call.type$ -- 5
-change.case$ -- 5
++ -- 18
+- -- 12
+* -- 58
+:= -- 150
+add.period$ -- 15
+call.type$ -- 6
+change.case$ -- 6
 chr.to.int$ -- 0
-cite$ -- 5
-duplicate$ -- 32
-empty$ -- 97
-format.name$ -- 8
-if$ -- 184
+cite$ -- 6
+duplicate$ -- 37
+empty$ -- 115
+format.name$ -- 12
+if$ -- 223
 int.to.chr$ -- 0
-int.to.str$ -- 5
+int.to.str$ -- 6
 missing$ -- 2
-newline$ -- 25
-num.names$ -- 3
-pop$ -- 26
+newline$ -- 30
+num.names$ -- 4
+pop$ -- 32
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 19
+skip$ -- 22
 stack$ -- 0
 substring$ -- 33
-swap$ -- 5
+swap$ -- 6
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 4
-width$ -- 6
-write$ -- 47
+while$ -- 5
+width$ -- 7
+write$ -- 57
 (There were 2 warnings)
