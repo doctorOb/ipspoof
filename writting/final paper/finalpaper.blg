@@ -1,53 +1,51 @@
 This is BibTeX, Version 0.99d (TeX Live 2013)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: finalpaper.aux
-The style file: plain.bst
+The style file: unsrt.bst
 Database file #1: references.bib.bib
 Warning--entry type for "ns-3-routing" isn't style-file defined
 --line 46 of file references.bib.bib
 Warning--entry type for "xxhash" isn't style-file defined
 --line 53 of file references.bib.bib
-Warning--to sort, need author or key in ns-3-routing
-Warning--to sort, need author or key in xxhash
 You've used 5 entries,
-            2118 wiz_defined-function locations,
-            527 strings with 4610 characters,
-and the built_in function-call counts, 1246 in all, are:
-= -- 114
-> -- 51
+            1791 wiz_defined-function locations,
+            475 strings with 4135 characters,
+and the built_in function-call counts, 809 in all, are:
+= -- 63
+> -- 32
 < -- 0
-+ -- 21
-- -- 16
-* -- 83
-:= -- 197
++ -- 13
+- -- 8
+* -- 48
+:= -- 121
 add.period$ -- 12
 call.type$ -- 5
-change.case$ -- 23
+change.case$ -- 5
 chr.to.int$ -- 0
-cite$ -- 7
-duplicate$ -- 42
-empty$ -- 117
-format.name$ -- 16
-if$ -- 266
+cite$ -- 5
+duplicate$ -- 32
+empty$ -- 97
+format.name$ -- 8
+if$ -- 184
 int.to.chr$ -- 0
 int.to.str$ -- 5
 missing$ -- 2
 newline$ -- 25
-num.names$ -- 6
-pop$ -- 37
+num.names$ -- 3
+pop$ -- 26
 preamble$ -- 1
-purify$ -- 18
+purify$ -- 0
 quote$ -- 0
-skip$ -- 37
+skip$ -- 19
 stack$ -- 0
-substring$ -- 58
+substring$ -- 33
 swap$ -- 5
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 20
-warning$ -- 2
-while$ -- 7
+type$ -- 0
+warning$ -- 0
+while$ -- 4
 width$ -- 6
 write$ -- 47
-(There were 4 warnings)
+(There were 2 warnings)
